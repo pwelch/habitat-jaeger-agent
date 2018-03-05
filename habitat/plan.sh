@@ -13,6 +13,9 @@ pkg_build_deps=(
   core/scaffolding-go
   core/git
 )
+pkg_deps=(
+  core/bash
+)
 pkg_bin_dirs=(bin)
 pkg_svc_user=root
 pkg_svc_group=root
@@ -27,24 +30,33 @@ pkg_exposes=(port-jaeger_agent)
 #   [storage]="port host"
 # )
 go_path="${HAB_CACHE_SRC_PATH}/go"
+jaeger_git_repo="https://github.com/jaegertracing/jaeger.git"
 
 do_before() {
   # Clean up from previous build
-  rm -rf $go_path
+  rm -rf "$go_path"
 
   export GOPATH=$go_path
-  mkdir -p $GOPATH
-  mkdir -p "$GOPATH/src/github.com/jaegertracing"
-  return $?
+  mkdir -p "$GOPATH"
+  export GOBIN=$GOPATH/bin
+  export PATH=$GOBIN:$PATH
+  export jaeger_local_path="$GOPATH/src/github.com/jaegertracing"
+}
+
+do_download() {
+  build_line "Overriding Download process"
+  return 0
 }
 
 do_verify() {
+  build_line "Overriding Verify process"
   return 0
 }
 
 do_unpack() {
-  pushd "$GOPATH/src/github.com/jaegertracing"
-  git clone --branch v${pkg_version} https://github.com/jaegertracing/jaeger.git
+  mkdir -p "${jaeger_local_path}"
+  pushd "${jaeger_local_path}"
+  git clone --branch v${pkg_version} ${jaeger_git_repo}
   popd
   return $?
 }
@@ -56,15 +68,15 @@ do_prepare() {
 }
 
 do_build() {
-  pushd "${GOPATH}/src/github.com/jaegertracing/jaeger"
+  build_line "Overriding Build: building jaeger-agent"
+  pushd "${jaeger_local_path}/jaeger"
   PATH=$PATH:$GOPATH/bin glide install
   CGO_ENABLED=0 GOOS=linux installsuffix=cgo \
-    go build -o ./cmd/agent/agent-linux ./cmd/agent/main.go
-
-  popd
-  return $?
+    go build -o ./cmd/agent/jaeger-agent ./cmd/agent/main.go
+  popd >/dev/null
 }
 
 do_install() {
-  return 0
+  build_line "Overriding Install: installing generated binaries"
+  cp -r "${jaeger_local_path}/jaeger/cmd/agent/jaeger-agent" "${pkg_prefix}/bin"
 }

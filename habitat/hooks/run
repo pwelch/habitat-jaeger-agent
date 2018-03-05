@@ -1,0 +1,6 @@
+#!{{pkgPathFor "core/bash"}}/bin/bash
+
+exec 2>&1
+
+# Start agent
+exec jaeger-agent
