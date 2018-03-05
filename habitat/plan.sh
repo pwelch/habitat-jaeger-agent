@@ -26,38 +26,45 @@ pkg_exposes=(port-jaeger_agent)
 # pkg_binds_optional=(
 #   [storage]="port host"
 # )
-jaeger_pkg_dir="$HAB_CACHE_SRC_PATH/${pkg_name}-${pkg_version}"
-jaeger_build_dir="${jaeger_pkg_dir}/src/${pkg_source}"
+go_path="${HAB_CACHE_SRC_PATH}/go"
 
-# do_prepare() {
-#  export GOPATH=$HAB_CACHE_SRC_PATH/$pkg_dirname
-# }
+do_before() {
+  # Clean up from previous build
+  rm -rf $go_path
+
+  export GOPATH=$go_path
+  mkdir -p $GOPATH
+  mkdir -p "$GOPATH/src/github.com/jaegertracing"
+  return $?
+}
 
 do_verify() {
   return 0
 }
 
 do_unpack() {
-  mkdir -p "$jaeger_pkg_dir/src/github.com/jaeger"
-  pushd "$jaeger_pkg_dir/src/github.com/jaeger"
+  pushd "$GOPATH/src/github.com/jaegertracing"
   git clone --branch v${pkg_version} https://github.com/jaegertracing/jaeger.git
   popd
+  return $?
+}
+
+do_prepare() {
+  go get github.com/Masterminds/glide
+  go install github.com/Masterminds/glide
+  return $?
 }
 
 do_build() {
-  export GOPATH=/root/go
-  pushd "${jaeger_pkg_dir}/src/github.com/jaeger/jaeger"
-
-  go get github.com/Masterminds/glide
-  go install github.com/Masterminds/glide
+  pushd "${GOPATH}/src/github.com/jaegertracing/jaeger"
   PATH=$PATH:$GOPATH/bin glide install
-
-  CGO_ENABLED=0 GOOS=linux installsuffix=cgo go build -o ./cmd/agent/agent-linux ./cmd/agent/main.go
+  CGO_ENABLED=0 GOOS=linux installsuffix=cgo \
+    go build -o ./cmd/agent/agent-linux ./cmd/agent/main.go
 
   popd
   return $?
 }
 
 do_install() {
-	return 0
+  return 0
 }
