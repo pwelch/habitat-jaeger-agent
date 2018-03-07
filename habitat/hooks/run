@@ -3,4 +3,8 @@
 exec 2>&1
 
 # Start agent
-exec jaeger-agent
+exec jaeger-agent --collector.host-port={{cfg.ports.collector-host-port}} \
+    --http-server.host-port=":{{cfg.ports.http_server-host-port}}" \
+    --processor.zipkin-compact.server-host-port=":{{cfg.ports.processor_zipkin_compact-server-host-port}}" \
+    --processor.jaeger-compact.server-host-port=":{{cfg.ports.processor_jaeger_compact-server-host-port}}" \
+    --processor.jaeger-binary.server-host-port=":{{cfg.ports.processor_jaeger_binary-server-host-port}}"

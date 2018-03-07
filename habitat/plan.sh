@@ -20,15 +20,21 @@ pkg_bin_dirs=(bin)
 pkg_svc_user=root
 pkg_svc_group=root
 pkg_exports=(
-  [port-jaeger_agent]=ports.jaeger_agent
+  [port-http_server]=ports.http_server-host-port
+  [port-zipkin_compact_server]=ports.processor_zipkin_compact-server-host-port
+  [port-jaeger_compact_server]=ports.processor_jaeger_compact-server-host-port
+  [port-jaeger_binary_server]=ports.processor_jaeger_binary-server-host-port
 )
-pkg_exposes=(port-jaeger_agent)
-# pkg_binds=(
-#   [database]="port host"
-# )
-# pkg_binds_optional=(
-#   [storage]="port host"
-# )
+pkg_exposes=(
+  port-http_server
+  port-zipkin_compact_server
+  port-jaeger_compact_server
+  port-jaeger_binary_server
+)
+pkg_binds_optional=(
+  [collector]="host:port"
+)
+
 go_path="${HAB_CACHE_SRC_PATH}/go"
 jaeger_git_repo="https://github.com/jaegertracing/jaeger.git"
 

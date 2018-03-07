@@ -1,5 +1,8 @@
-# Use this file to templatize your application's native configuration files.
-# See the docs at https://www.habitat.sh/docs/create-packages-configure/.
-# You can safely delete this file if you don't need it.
 [ports]
-jaeger_agent=6831
+# Collector
+collector-host-port="0.0.0.0:14267"
+# Agent ports
+http_server-host-port=5778
+processor_zipkin_compact-server-host-port=5775
+processor_jaeger_compact-server-host-port=6831
+processor_jaeger_binary-server-host-port=6832
