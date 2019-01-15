@@ -1,7 +1,7 @@
 pkg_name=jaeger-agent
 pkg_origin=pwelch
 pkg_version="1.2.0"
-pkg_maintainer="The Habitat Maintainers <humans@habitat.sh>"
+pkg_maintainer="pwelch <git@pwelch.net>"
 pkg_license=("Apache-2.0")
 # Git clone is used instead
 pkg_source="https://github.com/jaegertracing/jaeger/archive/v${pkg_version}.tar.gz"
